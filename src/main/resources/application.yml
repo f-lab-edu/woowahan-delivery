@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: food
+
+  profiles:
+    active: local   # 기본 실행은 local
+
+  jackson:
+    time-zone: Asia/Seoul
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
