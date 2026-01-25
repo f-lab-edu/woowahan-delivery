@@ -5,9 +5,13 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.dorkem.food.order.domain.OrderEventEntity;
+import com.dorkem.food.order.domain.OrderItemRead;
+import com.dorkem.food.order.domain.OrderRead;
 import com.dorkem.food.order.domain.event.OrderCreatedEvent;
 import com.dorkem.food.order.dto.OrderDtos;
 import com.dorkem.food.order.repository.OrderEventRepository;
+import com.dorkem.food.order.repository.OrderItemReadRepository;
+import com.dorkem.food.order.repository.OrderReadRepository;
 
 import jakarta.transaction.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -16,10 +20,19 @@ import tools.jackson.databind.ObjectMapper;
 public class OrderCommendService {
 
 	private final OrderEventRepository eventRepo;
+	private final OrderReadRepository orderReadRepo;
+	private final OrderItemReadRepository itemReadRepo;
 	private final ObjectMapper objectMapper;
 
-	public OrderCommendService(OrderEventRepository eventRepo, ObjectMapper objectMapper) {
+	public OrderCommendService(
+		OrderEventRepository eventRepo,
+		OrderReadRepository orderReadRepo,
+		OrderItemReadRepository itemReadRepo,
+		ObjectMapper objectMapper
+	) {
 		this.eventRepo = eventRepo;
+		this.orderReadRepo = orderReadRepo;
+		this.itemReadRepo = itemReadRepo;
 		this.objectMapper = objectMapper;
 	}
 
@@ -46,6 +59,28 @@ public class OrderCommendService {
 
 		String payload = writeJson(event);
 		eventRepo.save(OrderEventEntity.of(orderId, 1L, "OrderCreated", payload));
+
+		// 내 주문 정보 조회
+		orderReadRepo.save(OrderRead.created(
+			orderId,
+			req.accountId(),
+			req.storeId(),
+			totalMenuAmount,
+			req.deliveryFee(),
+			req.addrRoad(),
+			req.addrDetail()
+		));
+
+		int lineNo = 1;
+		for (var it : req.items()) {
+			itemReadRepo.save(OrderItemRead.of(
+				orderId,
+				lineNo++,
+				it.menuId(),
+				it.menuName(),
+				it.unitPrice(), it.quantity()
+			));
+		}
 
 		return orderId;
 	}
