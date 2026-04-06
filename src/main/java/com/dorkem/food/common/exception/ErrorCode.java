@@ -10,9 +10,12 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 
 	UNSUPPORTED_OAUTH_PROVIDER(40000, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인입니다."),
+	INVALID_CURRENT_PASSWORD(40001, HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다."),
+	DUPLICATED_NEW_PASSWORD(40002, HttpStatus.BAD_REQUEST, "현재 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
 	FAILURE_LOGIN(40100, HttpStatus.UNAUTHORIZED, "잘못된 아이디 또는 비밀번호입니다."),
 	EXPIRED_TOKEN_ERROR(40101, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
 	INVALID_TOKEN_ERROR(40102, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+	FORBIDDEN_OAUTH_PASSWORD_CHANGE(40301, HttpStatus.FORBIDDEN, "소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(40302, HttpStatus.FORBIDDEN, "주문에 접근 권한이 없습니다."),
 	NOT_FOUND_CUSTOMER(40401, HttpStatus.NOT_FOUND, "해당 고객을 찾을 수 없습니다."),
 	NOT_FOUND_USER(40402, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
