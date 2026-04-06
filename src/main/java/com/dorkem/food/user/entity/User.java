@@ -110,4 +110,21 @@ public class User {
 	public boolean matchPassword(String inputPassword) {
 		return this.password.equals(inputPassword);
 	}
+
+	public void updateProfile(String username, String phoneNumber) {
+		if (username != null) this.username = username;
+		if (phoneNumber != null) this.phoneNumber = phoneNumber;
+	}
+
+	public void updatePassword(String newPassword) {
+		this.password = newPassword;
+	}
+
+	public void updateProfileImage(String userProfile) {
+		this.userProfile = userProfile;
+	}
+
+	public boolean isOAuthUser() {
+		return this.provider != null;
+	}
 }
