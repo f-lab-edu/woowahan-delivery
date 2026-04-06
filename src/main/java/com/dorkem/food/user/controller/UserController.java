@@ -3,18 +3,22 @@ package com.dorkem.food.user.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dorkem.food.common.annotation.AuthUserId;
 import com.dorkem.food.common.response.ResponseDto;
 import com.dorkem.food.user.dto.request.LoginRequest;
 import com.dorkem.food.user.dto.request.RefreshTokenRequest;
 import com.dorkem.food.user.dto.request.SignupRequest;
+import com.dorkem.food.user.dto.request.UpdatePasswordRequest;
+import com.dorkem.food.user.dto.request.UpdateProfileRequest;
 import com.dorkem.food.user.dto.response.AccessTokenResponse;
 import com.dorkem.food.user.dto.response.LoginResponse;
 import com.dorkem.food.user.dto.response.UserProfileResponse;
@@ -81,5 +85,34 @@ public class UserController {
 		@AuthUserId Long userId
 	) {
 		return ResponseEntity.ok(ResponseDto.ok(userService.getProfile(userId)));
+	}
+
+	@PatchMapping("/me")
+	public ResponseEntity<ResponseDto<Void>> updateProfile(
+		@AuthUserId Long userId,
+		@RequestBody UpdateProfileRequest request
+	) {
+		userService.updateProfile(userId, request);
+		return ResponseEntity.ok(ResponseDto.ok(null));
+	}
+
+	@PatchMapping("/me/password")
+	public ResponseEntity<ResponseDto<Void>> updatePassword(
+		@AuthUserId Long userId,
+		@RequestBody UpdatePasswordRequest request
+	) {
+		userService.updatePassword(userId, request);
+		return ResponseEntity.ok(ResponseDto.ok(null));
+	}
+
+	@PatchMapping("/me/profile-image")
+	public ResponseEntity<ResponseDto<Void>> updateProfileImage(
+		@AuthUserId Long userId,
+		@RequestParam("image") MultipartFile image
+	) {
+		// TODO: S3 업로드 후 구현 후 채우기
+		String imageUrl = "123";
+		userService.updateProfileImage(userId, imageUrl);
+		return ResponseEntity.ok(ResponseDto.ok(null));
 	}
 }

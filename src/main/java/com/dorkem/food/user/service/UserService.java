@@ -14,6 +14,8 @@ import com.dorkem.food.oauth.entity.info.OAuthUserInfo;
 import com.dorkem.food.user.dto.request.LoginRequest;
 import com.dorkem.food.user.dto.request.RefreshTokenRequest;
 import com.dorkem.food.user.dto.request.SignupRequest;
+import com.dorkem.food.user.dto.request.UpdatePasswordRequest;
+import com.dorkem.food.user.dto.request.UpdateProfileRequest;
 import com.dorkem.food.user.dto.response.AccessTokenResponse;
 import com.dorkem.food.user.dto.response.LoginResponse;
 import com.dorkem.food.user.dto.response.UserProfileResponse;
@@ -120,6 +122,41 @@ public class UserService {
 	public UserProfileResponse getProfile(Long userId) {
 		User user = getUser(userId);
 		return UserProfileResponse.getUserInfo(user);
+	}
+
+	@Transactional
+	public void updateProfile(Long userId, UpdateProfileRequest request) {
+		User user = getUser(userId);
+
+		if (request.phoneNumber() != null
+			&& userRepository.existsByPhoneNumber(request.phoneNumber())) {
+			throw new CommonException(ErrorCode.DUPLICATED_PHONE_NUMBER);
+		}
+
+		user.updateProfile(request.username(), request.phoneNumber());
+	}
+
+	@Transactional
+	public void updatePassword(Long userId, UpdatePasswordRequest request) {
+		User user = getUser(userId);
+
+		if (user.isOAuthUser()) {
+			throw new CommonException(ErrorCode.FORBIDDEN_OAUTH_PASSWORD_CHANGE);
+		}
+		if (!user.matchPassword(request.currentPassword())) {
+			throw new CommonException(ErrorCode.INVALID_CURRENT_PASSWORD);
+		}
+		if (user.matchPassword(request.newPassword())) {
+			throw new CommonException(ErrorCode.DUPLICATED_NEW_PASSWORD);
+		}
+
+		user.updatePassword(request.newPassword());
+	}
+
+	@Transactional
+	public void updateProfileImage(Long userId, String imageUrl) {
+		User user = getUser(userId);
+		user.updateProfileImage(imageUrl);
 	}
 
 	private void matchPassword(LoginRequest request, User user) {
