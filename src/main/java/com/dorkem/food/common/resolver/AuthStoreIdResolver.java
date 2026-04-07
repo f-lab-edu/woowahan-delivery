@@ -7,16 +7,18 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import com.dorkem.food.common.annotation.AuthUserId;
+import com.dorkem.food.common.annotation.AuthStoreId;
+import com.dorkem.food.common.exception.CommonException;
+import com.dorkem.food.common.exception.ErrorCode;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
-public class ArgumentResolver implements HandlerMethodArgumentResolver {
+public class AuthStoreIdResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(AuthUserId.class)
+		return parameter.hasParameterAnnotation(AuthStoreId.class)
 			&& parameter.getParameterType().equals(Long.class);
 	}
 
@@ -28,6 +30,11 @@ public class ArgumentResolver implements HandlerMethodArgumentResolver {
 		WebDataBinderFactory binderFactory
 	) {
 		HttpServletRequest request = (HttpServletRequest)webRequest.getNativeRequest();
-		return request.getAttribute("userId");
+		Long storeId = (Long)request.getAttribute("storeId");
+
+		if (storeId == null) {
+			throw new CommonException(ErrorCode.NOT_FOUND_STORE_IN_TOKEN);
+		}
+		return storeId;
 	}
 }

@@ -13,6 +13,7 @@ public enum ErrorCode {
 	FAILURE_LOGIN(40100, HttpStatus.UNAUTHORIZED, "잘못된 아이디 또는 비밀번호입니다."),
 	EXPIRED_TOKEN_ERROR(40101, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
 	INVALID_TOKEN_ERROR(40102, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+	NOT_FOUND_STORE_IN_TOKEN(40103, HttpStatus.UNAUTHORIZED, "토큰에 가게 정보가 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(40302, HttpStatus.FORBIDDEN, "주문에 접근 권한이 없습니다."),
 	NOT_FOUND_CUSTOMER(40401, HttpStatus.NOT_FOUND, "해당 고객을 찾을 수 없습니다."),
 	NOT_FOUND_USER(40402, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
