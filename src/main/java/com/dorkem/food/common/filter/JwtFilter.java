@@ -79,12 +79,6 @@ public class JwtFilter extends OncePerRequestFilter {
 		return null;
 	}
 
-	private void handleErrorResponse(HttpServletResponse response, String message) throws IOException {
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write("{\"error\": \"" + message + "\"}");
-	}
-
 	private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String path) throws IOException {
 		response.setStatus(errorCode.getHttpStatus().value());
 		response.setContentType("application/json;charset=UTF-8");
