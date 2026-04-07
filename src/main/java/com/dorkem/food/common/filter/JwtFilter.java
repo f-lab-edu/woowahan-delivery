@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		"/api/v1/users/auth/login",
 		"/api/v1/users/auth/refresh",
 		"/api/v1/users/oauth",
-		"/api/v1/oauth",
+		"/api/v1/owner/auth/login",
 		"/v3/api-docs",
 		"/swagger-ui",
 		"/h2-console"
@@ -63,6 +63,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		request.setAttribute("userId", userId);
 		request.setAttribute("role", role);
+
+		// 일반 유저일 경우 null 반환
+		Long storeId = jwtProvider.getStoreIdFromToken(token);
+		if (storeId != null) {
+			request.setAttribute("storeId", storeId);
+		}
 
 		filterChain.doFilter(request, response);
 	}
