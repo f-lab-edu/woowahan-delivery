@@ -49,6 +49,14 @@ public class Menu {
 	@Column(name = "price", nullable = false)
 	private int price;
 
+	@Getter
+	@Column(name = "is_sold_out", nullable = false)
+	private boolean isSoldOut = false;
+
+	public void toggleSoldOut() {
+		this.isSoldOut = !this.isSoldOut;
+	}
+
 	@CreatedDate
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
