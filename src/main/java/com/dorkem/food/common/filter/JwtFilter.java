@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		"/api/v1/users/auth/login",
 		"/api/v1/users/auth/refresh",
 		"/api/v1/users/oauth",
-		"/api/v1/oauth",
+		"/api/v1/owner/auth/login",
 		"/v3/api-docs",
 		"/swagger-ui",
 		"/h2-console"
@@ -64,6 +64,12 @@ public class JwtFilter extends OncePerRequestFilter {
 		request.setAttribute("userId", userId);
 		request.setAttribute("role", role);
 
+		// 일반 유저일 경우 null 반환
+		Long storeId = jwtProvider.getStoreIdFromToken(token);
+		if (storeId != null) {
+			request.setAttribute("storeId", storeId);
+		}
+
 		filterChain.doFilter(request, response);
 	}
 
@@ -77,12 +83,6 @@ public class JwtFilter extends OncePerRequestFilter {
 			return bearer.substring(7);
 		}
 		return null;
-	}
-
-	private void handleErrorResponse(HttpServletResponse response, String message) throws IOException {
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write("{\"error\": \"" + message + "\"}");
 	}
 
 	private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String path) throws IOException {

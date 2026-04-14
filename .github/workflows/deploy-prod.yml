@@ -1,58 +1,52 @@
-name: Deploy to Review Branch
+name: 🚀 Deploy to Production (master)
 
 on:
   push:
-    branches: [ "feature/**", "fix/**", "dorkem", "main" ]
+    branches:
+      - master
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: checkout
+      - name: 코드 체크아웃
         uses: actions/checkout@v4
 
-      - name: Set Up JDK17
+      - name: JDK 17 설정 (Amazon Corretto)
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'corretto'
 
-      - name: Build Frontend
+      - name: 프론트엔드 빌드
         run: |
           cd frontend
           npm install
           npm run build
 
-      - name: Create application-dev.yml
-        env:
-          APP_DEV_YML: ${{ secrets.APP_DEV_YML }}
-        run: |
-          mkdir -p src/main/resources
-          printf '%s' "$APP_DEV_YML" > src/main/resources/application-dev.yml
-
-      - name: Build with Gradle
+      - name: 백엔드 빌드 (Gradle)
         run: |
           chmod +x ./gradlew
           ./gradlew clean build -x test
 
-      - name: store artifacts (JAR)
+      - name: 아티팩트 저장 (JAR)
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: build/libs/*.jar
           retention-days: 1
 
-      - name: store artifacts (Frontend)
+      - name: 아티팩트 저장 (Frontend)
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: frontend/dist/
           retention-days: 1
 
-      - name: store artifacts (deploy.sh)
+      - name: 아티팩트 저장 (deploy.sh)
         uses: actions/upload-artifact@v4
         with:
           name: deploy-script
@@ -60,25 +54,25 @@ jobs:
           retention-days: 1
 
   deploy-app-server-1:
-    needs: build-and-deploy
+    needs: build
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: download artifacts (JAR)
+      - name: 아티팩트 다운로드 (JAR)
         uses: actions/download-artifact@v4
         with:
           name: app-jar
           path: build/libs/
 
-      - name: download artifacts (deploy.sh)
+      - name: 아티팩트 다운로드 (deploy.sh)
         uses: actions/download-artifact@v4
         with:
           name: deploy-script
           path: scripts/
 
-      - name: Transfer deploy.sh to the app-01
+      - name: deploy.sh 전송 → EC2-2
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_1 }}
@@ -88,7 +82,7 @@ jobs:
           target: "/home/ec2-user/woowahan-delivery"
           strip_components: 1
 
-      - name: Transfer JAR to the app-01
+      - name: JAR 전송 → EC2-2
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_1 }}
@@ -98,7 +92,7 @@ jobs:
           target: "/home/ec2-user/woowahan-delivery"
           strip_components: 2
 
-      - name: Deploy to app-01 (dev)
+      - name: 배포 실행 → EC2-2 (prod)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_1 }}
@@ -107,28 +101,28 @@ jobs:
           script: |
             cd /home/ec2-user/woowahan-delivery
             chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_1 }} dev
+            ./deploy.sh ${{ secrets.APP_SERVER_HOST_1 }} prod
 
   deploy-app-server-2:
-    needs: build-and-deploy
+    needs: build
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: download artifacts (JAR)
+      - name: 아티팩트 다운로드 (JAR)
         uses: actions/download-artifact@v4
         with:
           name: app-jar
           path: build/libs/
 
-      - name: download artifacts (deploy.sh)
+      - name: 아티팩트 다운로드 (deploy.sh)
         uses: actions/download-artifact@v4
         with:
           name: deploy-script
           path: scripts/
 
-      - name: Transfer deploy.sh to the app-02
+      - name: deploy.sh 전송 → EC2-3
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_2 }}
@@ -138,7 +132,7 @@ jobs:
           target: "/home/ec2-user/woowahan-delivery"
           strip_components: 1
 
-      - name: Transfer JAR to the app-02
+      - name: JAR 전송 → EC2-3
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_2 }}
@@ -148,7 +142,7 @@ jobs:
           target: "/home/ec2-user/woowahan-delivery"
           strip_components: 2
 
-      - name: Deploy to app-02 (dev)
+      - name: 배포 실행 → EC2-3 (prod)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.APP_SERVER_HOST_2 }}
@@ -157,22 +151,28 @@ jobs:
           script: |
             cd /home/ec2-user/woowahan-delivery
             chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_2 }} dev
+            ./deploy.sh ${{ secrets.APP_SERVER_HOST_2 }} prod
 
   deploy-frontend:
-    needs: build-and-deploy
+    needs: build
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: download artifacts (Frontend)
+      - name: 아티팩트 다운로드 (Frontend)
         uses: actions/download-artifact@v4
         with:
           name: frontend-dist
           path: frontend/dist/
 
-      - name: Transfer Frontend to the LB
+      - name: 아티팩트 다운로드 (nginx.conf)
+        uses: actions/download-artifact@v4
+        with:
+          name: nginx-conf
+          path: scripts/
+
+      - name: 프론트엔드 전송 → EC2-1
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.LB_SERVER_HOST }}
@@ -181,3 +181,22 @@ jobs:
           source: "frontend/dist/**"
           target: "/var/www/woowahan-delivery"
           strip_components: 2
+
+      - name: nginx.conf 전송 → EC2-1
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.LB_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          source: "scripts/nginx.conf"
+          target: "/etc/nginx/conf.d"
+          strip_components: 1
+
+      - name: Nginx reload → EC2-1
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.LB_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            sudo nginx -t && sudo systemctl reload nginxde

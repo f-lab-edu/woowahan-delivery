@@ -14,6 +14,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -35,6 +36,7 @@ public class Menu {
 
 	@Getter
 	@ManyToOne
+	@JoinColumn(name = "store_id")
 	private Store store;
 
 	@Getter
@@ -48,6 +50,14 @@ public class Menu {
 	@Getter
 	@Column(name = "price", nullable = false)
 	private int price;
+
+	@Getter
+	@Column(name = "is_sold_out", nullable = false)
+	private boolean isSoldOut = false;
+
+	public void toggleSoldOut() {
+		this.isSoldOut = !this.isSoldOut;
+	}
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false)

@@ -73,11 +73,12 @@ public class User {
 	@Column(name = "modified_at", nullable = false)
 	private LocalDateTime modifiedAt;
 
-	private User(String email, String username, OAuthProvider provider, String providerId) {
+	private User(String email, String username, OAuthProvider provider, String providerId, String userProfile) {
 		this.email = email;
 		this.username = username;
 		this.provider = provider;
 		this.providerId = providerId;
+		this.userProfile = userProfile;
 		this.role = UserRole.CUSTOMER;
 	}
 
@@ -99,8 +100,10 @@ public class User {
 		return new User(email, username, userAccount, password, phoneNumber, userProfile);
 	}
 
-	public static User createOAuthUser(String email, String username, OAuthProvider provider, String providerId) {
-		return new User(email, username, provider, providerId);
+	public static User createOAuthUser(String email, String username, OAuthProvider provider
+		, String providerId, String userProfile
+	) {
+		return new User(email, username, provider, providerId, userProfile);
 	}
 
 	public String getUserRole() {

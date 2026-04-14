@@ -87,7 +87,8 @@ public class UserService {
 						userInfo.getEmail(),
 						userInfo.getUsername(),
 						userInfo.getProvider(),
-						userInfo.getProviderId()
+						userInfo.getProviderId(),
+						s3Properties.getDefaultProfileImage()
 					)
 				);
 				customerRepository.save(Customer.createCustomer(newUser));

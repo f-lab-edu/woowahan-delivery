@@ -145,6 +145,14 @@ public class Store {
 		);
 	}
 
+	public void updateStatus(StoreStatus status) {
+		this.status = status;
+	}
+
+	public boolean isOpen() {
+		return this.status == StoreStatus.OPEN;
+	}
+
 	public void updateThumbnail(String thumbnailUrl) {
 		this.thumbnail = thumbnailUrl;
 	}
