@@ -2,6 +2,7 @@
 
 SERVER_IP=$1
 SPRING_PROFILE=$2
+AGENT_ID=$3
 
 DEPLOY_PATH="/home/ec2-user/woowahan-delivery"
 CONFIG_PATH="$DEPLOY_PATH/config/application-${SPRING_PROFILE}.yml"
@@ -13,9 +14,12 @@ if [ -n "$CURRENT_PID" ]; then
   sleep 5
 fi
 
-nohup java -jar "$JAR_FILE" \
+nohup java \
+  -javaagent:/opt/pinpoint-agent/pinpoint-bootstrap-3.0.5.jar \
+  -Dpinpoint.agentId=$AGENT_ID \
+  -Dpinpoint.applicationName=woowahan-delivery \
+  -jar "$JAR_FILE" \
   --spring.profiles.active="$SPRING_PROFILE" \
   > "$DEPLOY_PATH/app.log" 2>&1 &
 
 echo "배포 완료 → tail -f $DEPLOY_PATH/app.log"
-

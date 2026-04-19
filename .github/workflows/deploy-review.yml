@@ -107,7 +107,7 @@ jobs:
           script: |
             cd /home/ec2-user/woowahan-delivery
             chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_1 }} dev
+            ./deploy.sh ${{ secrets.APP_SERVER_HOST_1 }} dev server1
 
   deploy-app-server-2:
     needs: build-and-deploy
@@ -157,7 +157,7 @@ jobs:
           script: |
             cd /home/ec2-user/woowahan-delivery
             chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_2 }} dev
+            ./deploy.sh ${{ secrets.APP_SERVER_HOST_2 }} dev server2
 
   deploy-frontend:
     needs: build-and-deploy
