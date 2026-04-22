@@ -75,4 +75,10 @@ public class StoreController {
 		storeService.completeCookingAndRequestDispatch(storeId, orderId);
 		return ResponseEntity.ok(ResponseDto.ok(null));
 	}
+
+	@GetMapping("/test")
+	public ResponseEntity<String> test() throws InterruptedException {
+		Thread.sleep(200);
+		return ResponseEntity.ok("ok");
+	}
 }
