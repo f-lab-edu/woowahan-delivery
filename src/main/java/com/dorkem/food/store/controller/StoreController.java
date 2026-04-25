@@ -29,7 +29,8 @@ public class StoreController {
 		@RequestParam(required = false) Integer categoryId,
 		@RequestParam(required = false) Long cursor,
 		@RequestParam(defaultValue = "15") int size
-	) {
+	) throws InterruptedException {
+		Thread.sleep(200);
 		return ResponseEntity.ok(ResponseDto.ok(storeService.getStores(categoryId, cursor, size)));
 	}
 
@@ -74,11 +75,5 @@ public class StoreController {
 	) {
 		storeService.completeCookingAndRequestDispatch(storeId, orderId);
 		return ResponseEntity.ok(ResponseDto.ok(null));
-	}
-
-	@GetMapping("/test")
-	public ResponseEntity<String> test() throws InterruptedException {
-		Thread.sleep(200);
-		return ResponseEntity.ok("ok");
 	}
 }
