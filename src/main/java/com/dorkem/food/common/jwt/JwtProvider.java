@@ -13,6 +13,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JwtProvider {
 
+	private static final String CLAIM_ROLE = "role";
+	private static final String CLAIM_STORE_ID = "storeId";
+
 	@Value("${jwt.secret}")
 	private String SECRET_KEY;
 
@@ -37,7 +40,7 @@ public class JwtProvider {
 	private String createToken(String userId, String role, long tokenValidTime) {
 		return Jwts.builder()
 			.setSubject(userId)
-			.claim("role", role)
+			.claim(CLAIM_ROLE, role)
 			.setIssuedAt(new Date())
 			.setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
 			.signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
@@ -47,8 +50,8 @@ public class JwtProvider {
 	private String createOwnerToken(String userId, String role, Long storeId, long tokenValidTime) {
 		return Jwts.builder()
 			.setSubject(String.valueOf(userId))
-			.claim("role", role)
-			.claim("storeId", storeId)
+			.claim(CLAIM_ROLE, role)
+			.claim(CLAIM_STORE_ID, storeId)
 			.setIssuedAt(new Date())
 			.setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
 			.signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
@@ -60,10 +63,12 @@ public class JwtProvider {
 	}
 
 	public String getRoleFromToken(String token) {
-		return getClaims(token).get("role", String.class);
+		return getClaims(token).get(CLAIM_ROLE, String.class);
 	}
 
-	public Long getStoreIdFromToken(String token) { return getClaims(token).get("storeId", Long.class); }
+	public Long getStoreIdFromToken(String token) {
+		return getClaims(token).get(CLAIM_STORE_ID, Long.class);
+	}
 
 	private Claims getClaims(String token) {
 		return Jwts.parserBuilder()

@@ -19,6 +19,7 @@ import com.dorkem.food.store.entity.Store;
 import com.dorkem.food.store.entity.StoreStatus;
 import com.dorkem.food.store.repository.StoreQueryRepository;
 import com.dorkem.food.store.repository.StoreRepository;
+import com.dorkem.food.user.dto.request.LoginRequest;
 import com.dorkem.food.user.dto.request.OwnerLoginRequest;
 import com.dorkem.food.user.dto.response.LoginResponse;
 import com.dorkem.food.user.entity.Owner;
@@ -47,7 +48,7 @@ public class OwnerService {
 	@Transactional
 	public LoginResponse ownerLogin(OwnerLoginRequest request) {
 		User user = getUserByEmail(request.email());
-		matchPassword(request.password(), user);
+		matchPassword(request, user);
 
 		Owner owner = getOwnerByUser(user);
 		validateStoreAccess(request.storeId(), owner);
@@ -84,9 +85,14 @@ public class OwnerService {
 	}
 
 	@Transactional
-	public void toggleMenuSoldOut(Long storeId, Long menuId) {
+	public void updateMenuSoldOutStatus(Long storeId, Long menuId) {
 		Menu menu = getMenu(menuId, storeId);
-		menu.toggleSoldOut();
+
+		if (menu.isSoldOut()) {
+			menu.markOnSale();
+		} else {
+			menu.markSoldOut();
+		}
 	}
 
 	private User getUserByEmail(String email) {
@@ -94,8 +100,8 @@ public class OwnerService {
 			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 	}
 
-	private void matchPassword(String rawPassword, User user) {
-		if (!user.matchPassword(rawPassword)) {
+	private void matchPassword(OwnerLoginRequest request, User user) {
+		if (!user.matchPassword(request.password())) {
 			throw new CommonException(ErrorCode.FAILURE_LOGIN);
 		}
 	}

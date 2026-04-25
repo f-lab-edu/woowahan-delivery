@@ -6,7 +6,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.dorkem.food.user.converter.PasswordConverter;
+
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -48,6 +52,7 @@ public class User {
 	private String userAccount;
 
 	@Column(name = "password")
+	@Convert(converter = PasswordConverter.class)
 	private String password;
 
 	@Getter
@@ -111,12 +116,16 @@ public class User {
 	}
 
 	public boolean matchPassword(String inputPassword) {
-		return this.password.equals(inputPassword);
+		return BCrypt.verifyer()
+			.verify(inputPassword.toCharArray(), this.password)
+			.verified;
 	}
 
 	public void updateProfile(String username, String phoneNumber) {
-		if (username != null) this.username = username;
-		if (phoneNumber != null) this.phoneNumber = phoneNumber;
+		if (username != null)
+			this.username = username;
+		if (phoneNumber != null)
+			this.phoneNumber = phoneNumber;
 	}
 
 	public void updatePassword(String newPassword) {
