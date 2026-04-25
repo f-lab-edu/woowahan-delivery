@@ -2,7 +2,7 @@ name: Deploy to Review Branch
 
 on:
   push:
-    branches: [ "feature/**", "fix/**", "dorkem", "main", "refactor/**"]
+    branches: [ "feature/**", "fix/**", "dorkem", "main", "refactor/**" ]
 
 jobs:
   build-and-deploy:

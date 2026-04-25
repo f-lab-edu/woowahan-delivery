@@ -55,8 +55,12 @@ public class Menu {
 	@Column(name = "is_sold_out", nullable = false)
 	private boolean isSoldOut = false;
 
-	public void toggleSoldOut() {
-		this.isSoldOut = !this.isSoldOut;
+	public void markSoldOut() {
+		this.isSoldOut = true;
+	}
+
+	public void markOnSale() {
+		this.isSoldOut = false;
 	}
 
 	@CreatedDate

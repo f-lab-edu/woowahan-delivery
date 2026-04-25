@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import com.dorkem.food.store.entity.QStore;
 import com.dorkem.food.store.entity.Store;
 import com.dorkem.food.user.entity.Owner;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -36,10 +35,10 @@ public class StoreQueryRepository {
 	public Optional<Store> findByIdAndOwner(Long storeId, Owner owner) {
 		return Optional.ofNullable(
 			queryFactory
-				.selectFrom(QStore.store)
+				.selectFrom(store)
 				.where(
-					QStore.store.storeId.eq(storeId),
-					QStore.store.owner.eq(owner)
+					store.storeId.eq(storeId),
+					store.owner.eq(owner)
 				)
 				.fetchOne()
 		);

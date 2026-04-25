@@ -81,7 +81,7 @@ public class OwnerController {
 		@AuthStoreId Long storeId,
 		@PathVariable Long menuId
 	) {
-		ownerService.toggleMenuSoldOut(storeId, menuId);
+		ownerService.updateMenuSoldOutStatus(storeId, menuId);
 		return ResponseEntity.ok(ResponseDto.ok(null));
 	}
 }
