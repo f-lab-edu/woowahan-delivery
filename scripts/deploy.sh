@@ -20,8 +20,6 @@ nohup java \
   -Dpinpoint.applicationName=woowahan-delivery \
   -jar "$JAR_FILE" \
   --spring.profiles.active="$SPRING_PROFILE" \
-  --spring.datasource.hikari.maximum-pool-size=50 \
-  --server.tomcat.threads.max=400 \
   > "$DEPLOY_PATH/app.log" 2>&1 &
 
 echo "배포 완료 → tail -f $DEPLOY_PATH/app.log"
