@@ -33,7 +33,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		"/api/v1/owner/auth/login",
 		"/v3/api-docs",
 		"/swagger-ui",
-		"/h2-console"
+		"/h2-console",
+		"/api/v1/stores/test"
 	);
 
 	@Override
