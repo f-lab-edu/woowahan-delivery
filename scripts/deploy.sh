@@ -15,11 +15,14 @@ if [ -n "$CURRENT_PID" ]; then
 fi
 
 nohup java \
+  -XX:+UseG1GC \
   -javaagent:/opt/pinpoint-agent/pinpoint-bootstrap-3.0.5.jar \
   -Dpinpoint.agentId=$AGENT_ID \
   -Dpinpoint.applicationName=woowahan-delivery \
   -jar "$JAR_FILE" \
   --spring.profiles.active="$SPRING_PROFILE" \
+  --server.tomcat.threads.max=400 \
+  --server.tomcat.accept-count=200 \
   > "$DEPLOY_PATH/app.log" 2>&1 &
 
 echo "배포 완료 → tail -f $DEPLOY_PATH/app.log"
