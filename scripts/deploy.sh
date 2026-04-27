@@ -22,6 +22,7 @@ nohup java \
   -jar "$JAR_FILE" \
   --spring.profiles.active="$SPRING_PROFILE" \
   --server.tomcat.threads.max=400 \
+  --spring.datasource.hikari.maximum-pool-size=25 \
   > "$DEPLOY_PATH/app.log" 2>&1 &
 
 echo "배포 완료 → tail -f $DEPLOY_PATH/app.log"
