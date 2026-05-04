@@ -21,6 +21,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd frontend
+          echo "VITE_API_BASE_URL=${{ secrets.API_BASE_URL }}" > .env.production
           npm install
           npm run build
 
