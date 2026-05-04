@@ -1,5 +1,6 @@
 export function createApi() {
-  const BASE_URL = '/api/v1';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
+  const BASE_URL = `${API_BASE_URL}/api/v1`;
 
   let isRefreshing = false;
   let refreshSubscribers = []; // 대기 큐 추가
