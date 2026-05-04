@@ -52,6 +52,9 @@ dependencies {
 
 	//컨버터를 위한 bcrypt
 	implementation 'at.favre.lib:bcrypt:0.10.2'
+
+	//헬스체크를 위해
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {

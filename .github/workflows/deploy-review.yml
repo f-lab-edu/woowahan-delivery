@@ -1,8 +1,8 @@
-name: Deploy to Review Branch
+name: Deploy
 
 on:
   push:
-    branches: [ "feature/**", "fix/**", "dorkem", "main", "refactor/**" ]
+    branches: [ "feature/**", "fix/**", "main", "refactor/**" ]
 
 jobs:
   build-and-deploy:
@@ -11,11 +11,9 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set Up JDK17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'corretto'
@@ -38,127 +36,25 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean build -x test
 
-      - name: store artifacts (JAR)
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: build/libs/*.jar
           retention-days: 1
 
-      - name: store artifacts (Frontend)
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: frontend/dist/
           retention-days: 1
 
-      - name: store artifacts (deploy.sh)
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: deploy-script
           path: scripts/deploy.sh
           retention-days: 1
 
-  deploy-app-server-1:
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-    steps:
-      - name: download artifacts (JAR)
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/
-
-      - name: download artifacts (deploy.sh)
-        uses: actions/download-artifact@v4
-        with:
-          name: deploy-script
-          path: scripts/
-
-      - name: Transfer deploy.sh to the app-01
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_1 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          source: "scripts/deploy.sh"
-          target: "/home/ec2-user/woowahan-delivery"
-          strip_components: 1
-
-      - name: Transfer JAR to the app-01
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_1 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          source: "build/libs/*.jar"
-          target: "/home/ec2-user/woowahan-delivery"
-          strip_components: 2
-
-      - name: Deploy to app-01 (dev)
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_1 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          script: |
-            cd /home/ec2-user/woowahan-delivery
-            chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_1 }} dev server1
-
-  deploy-app-server-2:
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-    steps:
-      - name: download artifacts (JAR)
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/
-
-      - name: download artifacts (deploy.sh)
-        uses: actions/download-artifact@v4
-        with:
-          name: deploy-script
-          path: scripts/
-
-      - name: Transfer deploy.sh to the app-02
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_2 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          source: "scripts/deploy.sh"
-          target: "/home/ec2-user/woowahan-delivery"
-          strip_components: 1
-
-      - name: Transfer JAR to the app-02
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_2 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          source: "build/libs/*.jar"
-          target: "/home/ec2-user/woowahan-delivery"
-          strip_components: 2
-
-      - name: Deploy to app-02 (dev)
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.APP_SERVER_HOST_2 }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          script: |
-            cd /home/ec2-user/woowahan-delivery
-            chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.APP_SERVER_HOST_2 }} dev server2
-
+  # ── 프론트 배포 ────────────────────────────────────────────────
   deploy-frontend:
     needs: build-and-deploy
     runs-on: ubuntu-latest
@@ -166,18 +62,95 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: download artifacts (Frontend)
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: frontend-dist
           path: frontend/dist/
 
-      - name: Transfer Frontend to the LB
+      - name: S3 업로드 (assets - 영구캐시)
+        run: |
+          aws s3 sync frontend/dist/ s3://${{ secrets.S3_BUCKET_NAME }} \
+            --delete \
+            --exclude "index.html" \
+            --cache-control "public, max-age=31536000, immutable"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+
+      - name: S3 업로드 (index.html - 캐시없음)
+        run: |
+          aws s3 cp frontend/dist/index.html \
+            s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
+            --cache-control "no-cache, no-store, must-revalidate"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+
+      - name: CloudFront 캐시 무효화
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+            --paths "/index.html"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+
+  # ── 백엔드 배포 ────────────────────────────────────────────────
+  deploy-app-server:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: deploy-script
+          path: scripts/
+
+      - name: Transfer deploy.sh
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.LB_SERVER_HOST }}
+          host: ${{ secrets.APP_SERVER_PRIVATE_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
-          source: "frontend/dist/**"
-          target: "/var/www/woowahan-delivery"
+          proxy_host: ${{ secrets.BASTION_HOST }}
+          proxy_username: ${{ secrets.SERVER_USER }}
+          proxy_key: ${{ secrets.SERVER_KEY }}
+          source: "scripts/deploy.sh"
+          target: "/home/ec2-user/woowahan-delivery"
+          strip_components: 1
+
+      - name: Transfer JAR
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.APP_SERVER_PRIVATE_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          proxy_host: ${{ secrets.BASTION_HOST }}
+          proxy_username: ${{ secrets.SERVER_USER }}
+          proxy_key: ${{ secrets.SERVER_KEY }}
+          source: "build/libs/*.jar"
+          target: "/home/ec2-user/woowahan-delivery"
           strip_components: 2
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.APP_SERVER_PRIVATE_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          proxy_host: ${{ secrets.BASTION_HOST }}
+          proxy_username: ${{ secrets.SERVER_USER }}
+          proxy_key: ${{ secrets.SERVER_KEY }}
+          script: |
+            chmod +x /home/ec2-user/woowahan-delivery/deploy.sh
+            /home/ec2-user/woowahan-delivery/deploy.sh dev
