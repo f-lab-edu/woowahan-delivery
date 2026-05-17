@@ -13,11 +13,12 @@ import com.dorkem.food.cart.repository.CartQueryRepository;
 import com.dorkem.food.cart.repository.CartRepository;
 import com.dorkem.food.common.exception.CommonException;
 import com.dorkem.food.common.exception.ErrorCode;
-import com.dorkem.food.menu.entity.Menu;
-import com.dorkem.food.menu.repository.MenuRepository;
+import com.dorkem.food.store.entity.Menu;
+import com.dorkem.food.store.repository.MenuRepository;
+import com.dorkem.food.store.entity.Store;
+import com.dorkem.food.store.repository.StoreRepository;
 import com.dorkem.food.user.entity.Customer;
 import com.dorkem.food.user.repository.CustomerQueryRepository;
-import com.dorkem.food.user.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,26 +31,30 @@ public class CartService {
 	private final CartQueryRepository cartQueryRepository;
 	private final CustomerQueryRepository customerQueryRepository;
 	private final MenuRepository menuRepository;
+	private final StoreRepository storeRepository;
 
 	@Transactional
 	public CartResponse getCart(Long userId) {
 		Customer customer = getCustomer(userId);
-		Cart cart = getOrCreateCart(customer);
+		Cart cart = getOrCreateCart(customer.getCustomerId());
 		return CartResponse.createCartResponse(cart);
 	}
 
 	@Transactional
 	public CartResponse addItem(Long userId, AddCartItemRequest request) {
 		Customer customer = getCustomer(userId);
-		Cart cart = getOrCreateCart(customer);
+		Cart cart = getOrCreateCart(customer.getCustomerId());
 		Menu menu = getMenu(request);
 
 		cart.getItems().stream()
-			.filter(item -> item.getMenu().getMenuId().equals(menu.getMenuId()))
+			.filter(item -> item.getMenuId().equals(menu.getMenuId()))
 			.findFirst()
 			.ifPresentOrElse(
 				item -> item.updateQuantity(request.quantity()),
-				() -> cart.addItem(menu.getStore(), CartItem.createCartItem(menu, request.quantity()))
+				() -> cart.addItem(
+					menu.getStoreId(),
+					CartItem.createCartItem(menu.getMenuId(), menu.getMenuName(), menu.getPrice(), request.quantity())
+				)
 			);
 
 		return CartResponse.createCartResponse(cart);
@@ -58,7 +63,7 @@ public class CartService {
 	@Transactional
 	public CartResponse updateItem(Long userId, Long cartItemId, UpdateCartItemRequest request) {
 		Customer customer = getCustomer(userId);
-		Cart cart = getCart(customer);
+		Cart cart = findExistingCart(customer.getCustomerId());
 		CartItem cartItem = findItemInCart(cartItemId, cart);
 
 		cartItem.updateQuantity(request.quantity());
@@ -73,7 +78,7 @@ public class CartService {
 	@Transactional
 	public CartResponse removeItem(Long userId, Long cartItemId) {
 		Customer customer = getCustomer(userId);
-		Cart cart = getCart(customer);
+		Cart cart = findExistingCart(customer.getCustomerId());
 		CartItem cartItem = findItemInCart(cartItemId, cart);
 
 		cart.getItems().remove(cartItem);
@@ -87,9 +92,9 @@ public class CartService {
 			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CUSTOMER));
 	}
 
-	private Cart getOrCreateCart(Customer customer) {
-		return cartQueryRepository.getCustomerCart(customer.getCustomerId())
-			.orElseGet(() -> cartRepository.save(Cart.createCart(customer)));
+	private Cart getOrCreateCart(Long customerId) {
+		return cartQueryRepository.getCustomerCart(customerId)
+			.orElseGet(() -> cartRepository.save(Cart.createCart(customerId)));
 	}
 
 	private Menu getMenu(AddCartItemRequest request) {
@@ -104,9 +109,14 @@ public class CartService {
 			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CART_ITEM));
 	}
 
-	private Cart getCart(Customer customer) {
-		return cartQueryRepository.getCustomerCart(customer.getCustomerId())
+	private Cart findExistingCart(Long customerId) {
+		return cartQueryRepository.getCustomerCart(customerId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_CART));
+	}
+
+	private Store getStore(Long storeId) {
+		return storeRepository.findById(storeId)
+			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_STORE));
 	}
 
 	private void removeCartItem(Cart cart, CartItem cartItem) {

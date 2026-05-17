@@ -6,19 +6,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.dorkem.food.order.entity.Order;
-import com.dorkem.food.store.entity.Store;
-import com.dorkem.food.user.entity.Customer;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,17 +36,14 @@ public class Review {
 	@Column(name = "content", nullable = false)
 	private String content;
 
-	@ManyToOne
-	@JoinColumn(name = "store_id")
-	private Store store;
+	@Column(name = "store_id", nullable = false)
+	private Long storeId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "customer_id", nullable = false)
-	private Customer customer;
+	@Column(name = "customer_id", nullable = false)
+	private Long customerId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false)
-	private Order order;
+	@Column(name = "order_id", nullable = false)
+	private String orderId;
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false)
@@ -63,19 +53,15 @@ public class Review {
 	@Column(name = "modified_at", nullable = false)
 	private LocalDateTime modifiedAt;
 
-	private Review(Store store, Customer customer, Order order, int rating, String content) {
-		this.store = store;
-		this.customer = customer;
-		this.order = order;
+	private Review(Long storeId, Long customerId, String orderId, int rating, String content) {
+		this.storeId = storeId;
+		this.customerId = customerId;
+		this.orderId = orderId;
 		this.rating = rating;
 		this.content = content;
 	}
 
-	public static Review createReview(Store store, Customer customer, Order order, int rating, String content) {
-		return new Review(store, customer, order, rating, content);
-	}
-
-	public void assignStore(Store store) {
-		this.store = store;
+	public static Review createReview(Long storeId, Long customerId, String orderId, int rating, String content) {
+		return new Review(storeId, customerId, orderId, rating, content);
 	}
 }

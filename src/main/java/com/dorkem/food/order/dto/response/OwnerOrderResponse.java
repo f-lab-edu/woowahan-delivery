@@ -17,7 +17,7 @@ public record OwnerOrderResponse(
 	public static OwnerOrderResponse from(Order order) {
 		return new OwnerOrderResponse(
 			order.getOrderId(),
-			order.getCustomer().getPhoneNumber(),
+			order.getCustomerPhone(),
 			order.getOrderItems().stream()
 				.map(OrderItemDto::from)
 				.toList(),

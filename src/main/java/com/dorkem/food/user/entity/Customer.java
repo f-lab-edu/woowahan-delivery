@@ -40,7 +40,8 @@ public class Customer {
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
 
-	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "customer_id", nullable = false)
 	private List<Address> addresses = new ArrayList<>();
 
 	@CreatedDate
@@ -61,7 +62,6 @@ public class Customer {
 
 	public void addAddress(Address address) {
 		this.addresses.add(address);
-		address.assignCustomer(this);
 	}
 
 	public String getPhoneNumber() {

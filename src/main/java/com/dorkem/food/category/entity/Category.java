@@ -1,15 +1,10 @@
 package com.dorkem.food.category.entity;
 
-import java.util.List;
-
-import com.dorkem.food.store.entity.Store;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +33,4 @@ public class Category {
 
 	@Column(name = "sort_order", nullable = false)
 	private int sortOrder;
-
-	@OneToMany(mappedBy = "category")
-	private List<Store> stores;
 }

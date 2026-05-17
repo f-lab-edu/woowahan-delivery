@@ -10,12 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -30,10 +27,6 @@ public class OrderStatusHistory {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false, updatable = false)
-	private Order order;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, updatable = false)
 	private OrderStatus status;
@@ -42,13 +35,12 @@ public class OrderStatusHistory {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
-	private OrderStatusHistory(Order order, OrderStatus status) {
-		this.order = order;
+	private OrderStatusHistory(OrderStatus status) {
 		this.status = status;
 	}
 
-	public static OrderStatusHistory addHistory(Order order, OrderStatus status) {
-		return new OrderStatusHistory(order, status);
+	public static OrderStatusHistory addHistory(OrderStatus status) {
+		return new OrderStatusHistory(status);
 	}
 
 	public OrderStatus getStatus() {

@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dorkem.food.common.exception.CommonException;
 import com.dorkem.food.common.exception.ErrorCode;
 import com.dorkem.food.common.jwt.JwtProvider;
-import com.dorkem.food.menu.entity.Menu;
-import com.dorkem.food.menu.repository.MenuQueryRepository;
+import com.dorkem.food.store.entity.Menu;
+import com.dorkem.food.store.repository.MenuQueryRepository;
 import com.dorkem.food.order.dto.response.OwnerOrderResponse;
 import com.dorkem.food.order.entity.Order;
 import com.dorkem.food.order.repository.OrderQueryRepository;
@@ -19,7 +19,6 @@ import com.dorkem.food.store.entity.Store;
 import com.dorkem.food.store.entity.StoreStatus;
 import com.dorkem.food.store.repository.StoreQueryRepository;
 import com.dorkem.food.store.repository.StoreRepository;
-import com.dorkem.food.user.dto.request.LoginRequest;
 import com.dorkem.food.user.dto.request.OwnerLoginRequest;
 import com.dorkem.food.user.dto.response.LoginResponse;
 import com.dorkem.food.user.entity.Owner;
@@ -112,7 +111,7 @@ public class OwnerService {
 	}
 
 	private void validateStoreAccess(Long storeId, Owner owner) {
-		storeQueryRepository.findByIdAndOwner(storeId, owner)
+		storeQueryRepository.findByIdAndOwnerId(storeId, owner.getOwnerId())
 			.orElseThrow(() -> new CommonException(ErrorCode.FORBIDDEN_STORE_ACCESS));
 	}
 

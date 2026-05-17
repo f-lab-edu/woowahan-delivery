@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dorkem.food.common.exception.CommonException;
 import com.dorkem.food.common.exception.ErrorCode;
-import com.dorkem.food.menu.entity.Menu;
-import com.dorkem.food.menu.repository.MenuRepository;
+import com.dorkem.food.store.entity.Menu;
+import com.dorkem.food.store.repository.MenuRepository;
 import com.dorkem.food.order.dto.request.DeliveryAddressRequest;
 import com.dorkem.food.order.dto.request.OrderCreateRequest;
 import com.dorkem.food.order.dto.request.OrderCreateItemRequest;
@@ -28,7 +28,6 @@ import com.dorkem.food.store.entity.Store;
 import com.dorkem.food.store.repository.StoreRepository;
 import com.dorkem.food.user.entity.Customer;
 import com.dorkem.food.user.repository.CustomerQueryRepository;
-import com.dorkem.food.user.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,7 +61,11 @@ public class OrderService {
 			deliveryReq.deliveryDirections()
 		);
 
-		Order order = Order.createOrder(store, customer, orderRequirement, userDeliveryInfo, orderItems);
+		Order order = Order.createOrder(
+			store.getStoreId(), store.getStoreName(),
+			customer.getCustomerId(), customer.getPhoneNumber(),
+			orderRequirement, userDeliveryInfo, orderItems
+		);
 		orderRepository.save(order);
 
 		return order.getOrderId();
@@ -189,7 +192,7 @@ public class OrderService {
 	}
 
 	private Order getOrdersByStore(Long storeId, String orderId) {
-		return orderRepository.findByOrderIdAndStoreStoreId(orderId, storeId)
+		return orderRepository.findByOrderIdAndStoreId(orderId, storeId)
 			.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ORDER));
 	}
 
@@ -210,7 +213,7 @@ public class OrderService {
 			Menu menu = menuRepository.findById(itemReq.menuId())
 				.orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_MENU));
 
-			orderItems.add(OrderItem.createOrderItem(menu, itemReq.quantity()));
+			orderItems.add(OrderItem.createOrderItem(menu.getMenuId(), menu.getMenuName(), menu.getPrice(), itemReq.quantity()));
 		}
 
 		return orderItems;

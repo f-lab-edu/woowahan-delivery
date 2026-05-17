@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dorkem.food.common.annotation.AuthStoreId;
 import com.dorkem.food.common.response.ResponseDto;
-import com.dorkem.food.menu.dto.request.UpdateStoreStatusRequest;
+import com.dorkem.food.store.dto.request.UpdateStoreStatusRequest;
 import com.dorkem.food.order.dto.response.OwnerOrderResponse;
 import com.dorkem.food.user.dto.request.OwnerLoginRequest;
 import com.dorkem.food.user.dto.response.LoginResponse;

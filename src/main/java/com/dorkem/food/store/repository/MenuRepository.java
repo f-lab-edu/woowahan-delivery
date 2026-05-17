@@ -1,14 +1,14 @@
-package com.dorkem.food.menu.repository;
+package com.dorkem.food.store.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.dorkem.food.menu.entity.Menu;
+import com.dorkem.food.store.entity.Menu;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-	List<Menu> findByStore_StoreId(Long storeId);
+	List<Menu> findByStoreId(Long storeId);
 }

@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.dorkem.food.store.entity.Store;
-import com.dorkem.food.user.entity.Owner;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -32,20 +31,20 @@ public class StoreQueryRepository {
 			.fetch();
 	}
 
-	public Optional<Store> findByIdAndOwner(Long storeId, Owner owner) {
+	public Optional<Store> findByIdAndOwnerId(Long storeId, Long ownerId) {
 		return Optional.ofNullable(
 			queryFactory
 				.selectFrom(store)
 				.where(
 					store.storeId.eq(storeId),
-					store.owner.eq(owner)
+					store.ownerId.eq(ownerId)
 				)
 				.fetchOne()
 		);
 	}
 
 	private BooleanExpression eqCategory(Integer categoryId) {
-		return categoryId != null ? store.category.categoryId.eq(categoryId) : null;
+		return categoryId != null ? store.categoryId.eq(categoryId.longValue()) : null;
 	}
 
 	private BooleanExpression ltCursor(Long cursor) {

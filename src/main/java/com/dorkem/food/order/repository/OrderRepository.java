@@ -9,5 +9,5 @@ import com.dorkem.food.order.entity.Order;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
-	Optional<Order> findByOrderIdAndStoreStoreId(String orderId, Long storeId);
+	Optional<Order> findByOrderIdAndStoreId(String orderId, Long storeId);
 }

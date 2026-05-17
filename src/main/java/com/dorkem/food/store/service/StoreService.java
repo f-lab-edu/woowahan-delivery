@@ -14,7 +14,6 @@ import com.dorkem.food.store.dto.response.StoreResponse.StoreSummaryResponse;
 import com.dorkem.food.store.entity.Store;
 import com.dorkem.food.store.repository.StoreQueryRepository;
 import com.dorkem.food.store.repository.StoreRepository;
-import com.dorkem.food.user.entity.Owner;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,11 +26,11 @@ public class StoreService {
 	private final OrderService orderService;
 	private final S3Properties s3Properties;
 
-	public void createStore(CreateStoreRequest request, Owner owner, Category category) {
+	public void createStore(CreateStoreRequest request, Long ownerId, Long categoryId) {
 
 		Store store = Store.createStore(
-			owner,
-			category,
+			ownerId,
+			categoryId,
 			request.storeName(),
 			request.businessNumber(),
 			request.storeAddress(),

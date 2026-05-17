@@ -1,4 +1,4 @@
-package com.dorkem.food.menu.dto.request;
+package com.dorkem.food.store.dto.request;
 
 import com.dorkem.food.store.entity.StoreStatus;
 

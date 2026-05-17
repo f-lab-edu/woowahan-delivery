@@ -1,11 +1,13 @@
-package com.dorkem.food.menu.repository;
+package com.dorkem.food.store.repository;
+
+import static com.dorkem.food.store.entity.QMenu.*;
 
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import com.dorkem.food.menu.entity.Menu;
-import static com.dorkem.food.menu.entity.QMenu.menu;
+import com.dorkem.food.store.entity.Menu;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ public class MenuQueryRepository {
 				.selectFrom(menu)
 				.where(
 					menu.menuId.eq(menuId),
-					menu.store.storeId.eq(storeId)
+					menu.storeId.eq(storeId)
 				)
 				.fetchOne()
 		);

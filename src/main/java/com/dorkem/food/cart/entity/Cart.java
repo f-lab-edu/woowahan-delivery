@@ -8,21 +8,15 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.dorkem.food.store.entity.Store;
-import com.dorkem.food.user.entity.Customer;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,15 +34,14 @@ public class Cart {
 	@Column(name = "cart_id")
 	private Long cartId;
 
-	@OneToOne
-	@JoinColumn(name = "customer_id", nullable = false, unique = true)
-	private Customer customer;
+	@Column(name = "customer_id", nullable = false, unique = true)
+	private Long customerId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
-	private Store store;
+	@Column(name = "store_id")
+	private Long storeId;
 
-	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "cart_id", nullable = false)
 	private List<CartItem> items = new ArrayList<>();
 
 	@CreatedDate
@@ -59,26 +52,25 @@ public class Cart {
 	@Column(name = "modified_at", nullable = false)
 	private LocalDateTime modifiedAt;
 
-	private Cart(Customer customer) {
-		this.customer = customer;
+	private Cart(Long customerId) {
+		this.customerId = customerId;
 	}
 
-	public static Cart createCart(Customer customer) {
-		return new Cart(customer);
+	public static Cart createCart(Long customerId) {
+		return new Cart(customerId);
 	}
 
-	public void addItem(Store store, CartItem item) {
-		if (this.store != null && !this.store.getStoreId().equals(store.getStoreId())) {
+	public void addItem(Long storeId, CartItem item) {
+		if (this.storeId != null && !this.storeId.equals(storeId)) {
 			this.items.clear();
 		}
-		this.store = store;
+		this.storeId = storeId;
 		this.items.add(item);
-		item.assignCart(this);
 	}
 
 	public void clearItems() {
 		this.items.clear();
-		this.store = null;
+		this.storeId = null;
 	}
 
 	public int getTotalPrice() {

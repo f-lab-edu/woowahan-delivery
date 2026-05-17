@@ -26,9 +26,9 @@ VALUES (1, '김사장', '010-1111-1111', 'owner1@test.com', 'pass123', 'OWNER',
         'https://woowahan-d.s3.ap-northeast-2.amazonaws.com/defaults/default_user.png',
         NOW(), NOW());
 
--- 3. 사장님 데이터 (modified_at 추가)
-INSERT INTO owners (user_id, owner_name, business_number, created_at, modified_at)
-VALUES (1, '김사장', '123-45-67890', NOW(), NOW());
+-- 3. 사장님 데이터
+INSERT INTO owners (owner_id, user_id, owner_name, business_number, created_at, modified_at)
+VALUES (1, 1, '김사장', '123-45-67890', NOW(), NOW());
 
 -- 4. 식당 데이터
 -- [치킨]
@@ -89,10 +89,8 @@ VALUES (19, 1, 10, 'https://woowahan-d.s3.ap-northeast-2.amazonaws.com/defaults/
 
 -- PK 시퀀스
 ALTER TABLE users
-    ALTER COLUMN user_id RESTART WITH 3;
+    ALTER COLUMN user_id RESTART WITH 2;
+ALTER TABLE owners
+    ALTER COLUMN owner_id RESTART WITH 2;
 ALTER TABLE stores
-    ALTER COLUMN store_id RESTART WITH 11;
-ALTER TABLE menus
-    ALTER COLUMN menu_id RESTART WITH 7;
-ALTER TABLE reviews
-    ALTER COLUMN review_id RESTART WITH 3;
+    ALTER COLUMN store_id RESTART WITH 21;

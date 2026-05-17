@@ -1,6 +1,6 @@
 package com.dorkem.food.store.controller;
 
-import static com.dorkem.food.menu.dto.response.MenuResponse.*;
+import static com.dorkem.food.store.dto.response.MenuResponse.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dorkem.food.common.response.ResponseDto;
-import com.dorkem.food.menu.service.MenuService;
+import com.dorkem.food.store.service.MenuService;
 import com.dorkem.food.store.dto.response.StorePageResponse;
 import com.dorkem.food.store.service.StoreService;
 

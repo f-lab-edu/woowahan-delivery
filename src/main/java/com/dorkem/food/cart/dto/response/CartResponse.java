@@ -8,15 +8,13 @@ import com.dorkem.food.cart.entity.CartItem;
 public record CartResponse(
 	Long cartId,
 	Long storeId,
-	String storeName,
 	List<CartItemResponse> items,
 	int totalPrice
 ) {
 	public static CartResponse createCartResponse(Cart cart) {
 		return new CartResponse(
 			cart.getCartId(),
-			cart.getStore() != null ? cart.getStore().getStoreId() : null,
-			cart.getStore() != null ? cart.getStore().getStoreName() : null,
+			cart.getStoreId(),
 			cart.getItems().stream()
 				.map(CartItemResponse::createCartItemResponse)
 				.toList(),
@@ -35,9 +33,9 @@ public record CartResponse(
 		public static CartItemResponse createCartItemResponse(CartItem item) {
 			return new CartItemResponse(
 				item.getCartItemId(),
-				item.getMenu().getMenuId(),
-				item.getMenu().getMenuName(),
-				item.getMenu().getPrice(),
+				item.getMenuId(),
+				item.getMenuName(),
+				item.getPrice(),
 				item.getQuantity(),
 				item.getSubtotal()
 			);

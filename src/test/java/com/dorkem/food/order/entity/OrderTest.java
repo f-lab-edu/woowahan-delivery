@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import com.dorkem.food.order.entity.embedded.OrderRequirement;
 import com.dorkem.food.order.entity.embedded.UserDeliveryInfo;
-import com.dorkem.food.store.entity.Store;
-import com.dorkem.food.user.entity.Customer;
 
 @DisplayName("Order 엔티티 테스트")
 class OrderTest {
@@ -20,13 +18,11 @@ class OrderTest {
 
 	@BeforeEach
 	void setUp() {
-		Store store = mock(Store.class);
-		Customer customer = mock(Customer.class);
 		OrderRequirement orderRequirement = mock(OrderRequirement.class);
 		UserDeliveryInfo userDeliveryInfo = mock(UserDeliveryInfo.class);
 		List<OrderItem> orderItems = List.of(mock(OrderItem.class));
 
-		order = Order.createOrder(store, customer, orderRequirement, userDeliveryInfo, orderItems);
+		order = Order.createOrder(1L, "테스트가게", 1L, "010-0000-0000", orderRequirement, userDeliveryInfo, orderItems);
 	}
 
 	@Test
@@ -45,13 +41,12 @@ class OrderTest {
 	@Test
 	@DisplayName("정상적인 상태 흐름")
 	void 상태흐름이_정상일때() {
-		// order.requestPayment();
-		// order.completePayment();
+		order.requestPayment();
+		order.completePayment();
 		order.accept();
 		order.startCooking();
 		order.completeCooking();
 		order.requestDispatch();
-		order.completeDispatch();
 		order.startDelivery();
 		order.completeDelivery();
 	}

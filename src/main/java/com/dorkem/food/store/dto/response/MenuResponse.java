@@ -1,8 +1,8 @@
-package com.dorkem.food.menu.dto.response;
+package com.dorkem.food.store.dto.response;
 
 import java.util.List;
 
-import com.dorkem.food.menu.entity.Menu;
+import com.dorkem.food.store.entity.Menu;
 
 public record MenuResponse(
 	Long id,

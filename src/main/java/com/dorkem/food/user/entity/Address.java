@@ -9,12 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,10 +28,6 @@ public class Address {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "address_id")
 	private Long addressId;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "customer_id", nullable = false)
-	private Customer customer;
 
 	@Column(name = "address_tag")
 	private String addressTag;
@@ -78,9 +71,5 @@ public class Address {
 	) {
 		return new Address(addressTag, address, addressDetail, requestToRider, entranceAccessPassword,
 			deliveryDirections);
-	}
-
-	void assignCustomer(Customer customer) {
-		this.customer = customer;
 	}
 }

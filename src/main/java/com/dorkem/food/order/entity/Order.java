@@ -10,8 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.dorkem.food.order.entity.embedded.OrderRequirement;
 import com.dorkem.food.order.entity.embedded.UserDeliveryInfo;
-import com.dorkem.food.store.entity.Store;
-import com.dorkem.food.user.entity.Customer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,12 +18,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,18 +40,24 @@ public class Order {
 	@Column(name = "order_id")
 	private String orderId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
-	private Store store;
+	@Column(name = "store_id", nullable = false)
+	private Long storeId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "customer_id")
-	private Customer customer;
+	@Column(name = "store_name", nullable = false)
+	private String storeName;
 
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+	@Column(name = "customer_id", nullable = false)
+	private Long customerId;
+
+	@Column(name = "customer_phone", nullable = false)
+	private String customerPhone;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "order_id", nullable = false, updatable = false)
 	private List<OrderItem> orderItems = new ArrayList<>();
 
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "order_id", nullable = false, updatable = false)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
 	@Enumerated(EnumType.STRING)
@@ -82,17 +84,19 @@ public class Order {
 	@Column(name = "modified_at", nullable = false)
 	private LocalDateTime modifiedAt;
 
-	private Order(Store store, Customer customer, OrderRequirement orderRequirement,
-		UserDeliveryInfo userDeliveryInfo) {
-		this.store = store;
-		this.customer = customer;
+	private Order(Long storeId, String storeName, Long customerId, String customerPhone,
+		OrderRequirement orderRequirement, UserDeliveryInfo userDeliveryInfo) {
+		this.storeId = storeId;
+		this.storeName = storeName;
+		this.customerId = customerId;
+		this.customerPhone = customerPhone;
 		this.orderRequirement = orderRequirement;
 		this.userDeliveryInfo = userDeliveryInfo;
 	}
 
-	public static Order createOrder(Store store, Customer customer, OrderRequirement orderRequirement,
-		UserDeliveryInfo userDeliveryInfo, List<OrderItem> orderItems) {
-		Order order = new Order(store, customer, orderRequirement, userDeliveryInfo);
+	public static Order createOrder(Long storeId, String storeName, Long customerId, String customerPhone,
+		OrderRequirement orderRequirement, UserDeliveryInfo userDeliveryInfo, List<OrderItem> orderItems) {
+		Order order = new Order(storeId, storeName, customerId, customerPhone, orderRequirement, userDeliveryInfo);
 		orderItems.forEach(order::addOrderItem);
 		order.initStatus();
 		return order;
@@ -143,30 +147,37 @@ public class Order {
 
 	private void initStatus() {
 		this.currentStatus = OrderStatus.CREATED;
-		this.orderStatusHistories.add(OrderStatusHistory.addHistory(this, OrderStatus.CREATED));
+		this.orderStatusHistories.add(OrderStatusHistory.addHistory(OrderStatus.CREATED));
 	}
 
 	private void changeStatus(OrderStatus status) {
 		this.currentStatus.validateTransition(status);
 		this.currentStatus = status;
-		this.orderStatusHistories.add(OrderStatusHistory.addHistory(this, status));
+		this.orderStatusHistories.add(OrderStatusHistory.addHistory(status));
 	}
 
-	public void addOrderItem(OrderItem orderItem) {
+	private void addOrderItem(OrderItem orderItem) {
 		orderItems.add(orderItem);
-		orderItem.setOrder(this);
 	}
 
 	public void deactivate() {
 		this.isDeleted = true;
 	}
 
-	public String getStoreName() {
-		return store.getStoreName();
+	public Long getStoreId() {
+		return storeId;
 	}
 
-	public Customer getCustomer() {
-		return customer;
+	public String getStoreName() {
+		return storeName;
+	}
+
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public String getCustomerPhone() {
+		return customerPhone;
 	}
 
 	public UserDeliveryInfo getUserDeliveryInfo() {
